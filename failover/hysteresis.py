@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function
 from logging import getLogger
 from time import time
 from .units import count, second, ok
+from .validation import validate_after
 
 class HysteresisCheck(object):
     def __init__(self, task, state, ok_after, fail_after):
