@@ -2,6 +2,7 @@ from __future__ import absolute_import, print_function
 import failover
 import logging
 from sys import stderr
+from time import sleep
 from unittest import TestCase, main
 
 class TestTask(object):
@@ -44,4 +45,29 @@ class HysteresisTest(TestCase):
         self.assertTrue(checker())      # Fifth success -- transition
         self.assertTrue(checker())
 
+        return
+
+    def test_timed_hysteresis(self):
+        test_task = TestTask()
+        checker = failover.hysteresis(
+            task=test_task, start=failover.ok,
+            ok_after=failover.second(0.3),
+            fail_after=failover.second(0.5))
+
+        self.assertTrue(checker())
+        self.assertTrue(checker())
+
+        test_task.result = failover.fail
+        self.assertTrue(checker())      # Failure -- need a 0.5 sec delay
+        self.assertTrue(checker())      # Failure -- no delay, still ok
+        sleep(0.5)
+        self.assertFalse(checker())     # Failure -- delayed, so now failed
+        self.assertFalse(checker())
+        
+        test_task.result = failover.ok
+        self.assertFalse(checker())     # Success -- need a 0.3 sec delay
+        self.assertFalse(checker())     # Success -- no delay, still failed
+        sleep(0.3)
+        self.assertTrue(checker())      # Success -- delayed, so now ok
+        self.assertTrue(checker())
         return
