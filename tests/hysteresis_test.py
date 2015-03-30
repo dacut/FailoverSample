@@ -9,9 +9,12 @@ class TestTask(object):
     def __init__(self, result=failover.ok):
         super(TestTask, self).__init__()
         self.result = result
+        self.exception = None
         return
 
     def __call__(self):
+        if self.exception:
+            raise self.exception
         return self.result
 
 class HysteresisTest(TestCase):
@@ -71,3 +74,37 @@ class HysteresisTest(TestCase):
         self.assertTrue(checker())      # Success -- delayed, so now ok
         self.assertTrue(checker())
         return
+
+    def test_failed_hysteresis(self):
+        test_task = TestTask()
+        checker = failover.hysteresis(
+            task=test_task, start=failover.ok,
+            ok_after=failover.count(2),
+            fail_after=failover.count(2))
+
+        self.assertTrue(checker())
+        # Throw an exception from the underlying task; hysteresis should still
+        # succeed
+        test_task.exception = ValueError()
+        self.assertTrue(checker())
+        self.assertTrue(checker())
+        self.assertTrue(checker())
+        self.assertTrue(checker())
+
+        # Start failing
+        test_task.exception = None
+        test_task.result = failover.fail
+        self.assertTrue(checker())
+        self.assertFalse(checker())
+        self.assertFalse(checker())
+        self.assertFalse(checker())
+
+        # Throw an exception from the underlying task; hysteresis should still
+        # fail.
+        test_task.exception = ValueError()
+        self.assertFalse(checker())
+        self.assertFalse(checker())
+        self.assertFalse(checker())
+        self.assertFalse(checker())
+
+        

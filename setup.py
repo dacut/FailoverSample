@@ -12,7 +12,7 @@ class run_coverage(Command):
         subprocess.call(['coverage', 'erase'])
         subprocess.call(['coverage', 'run', '--source=failover', 'run_tests.py'])
         subprocess.call(['coverage', 'html'])
-        subprocess.call(['coverage', 'report'])
+        subprocess.call(['coverage', 'report', '--show-missing'])
 
 setup(name="FailoverSample",
       version="0.1.0",
