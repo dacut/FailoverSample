@@ -1,9 +1,22 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, print_function
-from setuptools import setup
+from setuptools import setup, Command
+
+class run_coverage(Command):
+    description = "Generate a test coverage report."
+    user_options = []    
+    def initialize_options(self): pass
+    def finalize_options(self): pass 
+    def run(self):
+        import subprocess
+        subprocess.call(['coverage', 'erase'])
+        subprocess.call(['coverage', 'run', '--source=failover', 'run_tests.py'])
+        subprocess.call(['coverage', 'html'])
+        subprocess.call(['coverage', 'report'])
 
 setup(name="FailoverSample",
       version="0.1.0",
+      cmdclass={"coverage": run_coverage},
       py_modules=["failover"],
       entry_points={
           "console_scripts": [
