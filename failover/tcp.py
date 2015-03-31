@@ -5,7 +5,41 @@ from .units import ok, fail
 from .validation import validate_duration, validate_hostname, validate_port
 import socket
 
-def check_tcp_service(host, port, timeout, source_host=None, source_port=None):
+class TCPCheck(object):
+    def __init__(self, host, port, timeout, source_host, source_port, name):
+        super(TCPCheck, self).__init__()
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+        self.source_host = source_host
+        self.source_port = source_port
+        self.name = name
+        return
+
+    def __call__(self):
+        log = getLogger("failover.tcp")
+        try:
+            log.info("Connecting to %s:%d", self.host, self.port)
+            socket.create_connection(
+                (self.host, self.port), self.timeout,
+                (self.source_host, self.source_port))
+            log.info("Connection to %s:%d succeeded", self.host, self.port)
+            return ok
+        except socket.error as e:
+            log.info("Connection to %s:%d failed: %s", self.host, self.port,
+                     str(e))
+            return fail
+
+    def __repr__(self):
+        if self.name is not None:
+            return self.name
+        else:
+            return ("TCPCheck(host=%r, port=%r, timeout=%r, source_host=%r, "
+                    "source_port=%r)" % (self.host, self.port, self.timeout,
+                                         self.source_host, self.source_port))
+
+def check_tcp_service(host, port, timeout, source_host=None, source_port=None,
+                      name=None):
     """
     check_tcp_service(host, port, timeout, source_host=None, source_port=None)
       -> function() -> bool
@@ -29,8 +63,6 @@ def check_tcp_service(host, port, timeout, source_host=None, source_port=None):
     If source_port is not None, the specified port is used for outgoing
     traffic to the host.
     """
-    import socket
-
     host = validate_hostname(host, "host")
     port = validate_port(port, "port")
     timeout = validate_duration(timeout, "timeout")
@@ -42,19 +74,9 @@ def check_tcp_service(host, port, timeout, source_host=None, source_port=None):
     if source_port is None:
         source_port = 0
 
-    log = getLogger("failover.tcp")
+    return TCPCheck(host=host, port=port, timeout=timeout,
+                    source_host=source_host, source_port=source_port,
+                    name=name)
 
-    def check_function():
-        import socket
-        try:
-            log.info("Connecting to %s:%d", host, port)
-            socket.create_connection(
-                (host, port), timeout, (source_host, source_port))
-            log.info("Connection to %s:%d succeeded", host, port)
-            return ok
-        except socket.error as e:
-            log.info("Connection to %s:%d failed: %s", host, port, str(e))
-            return fail
 
-    return check_function
 

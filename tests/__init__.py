@@ -6,6 +6,7 @@ def suite():
     import tests.hysteresis_test
     import tests.oneshot_test
     import tests.tcp_test
+    import tests.toggle_test
 
     ts = TestSuite()
     for module in [
@@ -13,6 +14,7 @@ def suite():
             tests.hysteresis_test,
             tests.oneshot_test,
             tests.tcp_test,
+            tests.toggle_test
     ]:
         ts.addTest(loader.loadTestsFromModule(module))
 

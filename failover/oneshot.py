@@ -6,11 +6,12 @@ from six.moves.http_client import UNAUTHORIZED, OK
 from .units import ok, fail
 
 class Oneshot(object):
-    def __init__(self, default_state=fail, auth=None):
+    def __init__(self, default_state=fail, auth=None, name=None):
         super(Oneshot, self).__init__()
         self.default_state = default_state
         self.next_state = default_state
         self.auth = auth
+        self.name = name
         return
 
     def __call__(self):
@@ -30,5 +31,11 @@ class Oneshot(object):
             handler.respond(OK, "Armed")
         return True
 
-def oneshot(default_state=fail, auth=None):
-    return Oneshot(default_state=default_state, auth=auth)
+    def __repr__(self):
+        if self.name is not None:
+            return self.name
+        else:
+            return super(Oneshot, self).__repr__()
+
+def oneshot(default_state=fail, auth=None, name=None):
+    return Oneshot(default_state=default_state, auth=auth, name=name)

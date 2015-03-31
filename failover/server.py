@@ -18,6 +18,12 @@ class FailoverServer(HTTPServer):
         return
     
     def add_component(self, name, task, on_post=None):
+        if getattr(task, "name", None) is None:
+            try:
+                task.name = name
+            except Exception as e:
+                pass
+
         if task:
             self.get_handlers[name] = task
 

@@ -5,6 +5,7 @@ from .hysteresis import hysteresis
 from .oneshot import oneshot
 from .server import create_healthcheck_server
 from .tcp import check_tcp_service
+from .toggle import toggle
 from .units import second, minute, hour, day, count, ok, fail
 
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "create_healthcheck_server",
     "oneshot",
     "check_tcp_service",
+    "toggle",
     "second",
     "minute",
     "hour", 

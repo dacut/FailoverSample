@@ -27,7 +27,7 @@ class HysteresisTest(TestCase):
     def test_counted_hysteresis(self):
         test_task = TestTask()
         checker = failover.hysteresis(
-            task=test_task, start=failover.ok,
+            task=test_task, initial_state=failover.ok,
             ok_after=failover.count(5),
             fail_after=failover.count(3))
 
@@ -53,7 +53,7 @@ class HysteresisTest(TestCase):
     def test_timed_hysteresis(self):
         test_task = TestTask()
         checker = failover.hysteresis(
-            task=test_task, start=failover.ok,
+            task=test_task, initial_state=failover.ok,
             ok_after=failover.second(0.3),
             fail_after=failover.second(0.5))
 
@@ -78,7 +78,7 @@ class HysteresisTest(TestCase):
     def test_failed_hysteresis(self):
         test_task = TestTask()
         checker = failover.hysteresis(
-            task=test_task, start=failover.ok,
+            task=test_task, initial_state=failover.ok,
             ok_after=failover.count(2),
             fail_after=failover.count(2))
 

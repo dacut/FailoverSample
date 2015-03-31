@@ -5,15 +5,16 @@ from time import time
 from .units import count, second, ok
 from .validation import validate_after
 
-class HysteresisCheck(object):
-    def __init__(self, task, state, ok_after, fail_after):
-        super(HysteresisCheck, self).__init__()
+class Hysteresis(object):
+    def __init__(self, task, state, ok_after, fail_after, name=None):
+        super(Hysteresis, self).__init__()
         self.task = task
         self.current_state = state
         self.ok_after = ok_after
         self.fail_after = fail_after
         self.disagree_count = 0
         self.disagree_start = None
+        self.name = name
         return
 
     def __call__(self):
@@ -74,10 +75,18 @@ class HysteresisCheck(object):
                          ("OK" if self.current_state else "FAIL"))
 
         return self.current_state
-# end HysteresisCheck
 
-def hysteresis(task, start=ok, ok_after=None, fail_after=None):
+    def __repr__(self):
+        if self.name is not None:
+            return self.name
+        else:
+            return super(Hysteresis, self).__repr__()
+# end Hysteresis
+
+def hysteresis(task, initial_state=ok, ok_after=None, fail_after=None,
+               name=None):
     ok_after = validate_after(ok_after, "ok_after")
     fail_after = validate_after(fail_after, "fail_after")
-    return HysteresisCheck(task, start, ok_after, fail_after)
+    return Hysteresis(task=task, state=initial_state, ok_after=ok_after,
+                      fail_after=fail_after, name=name)
         
