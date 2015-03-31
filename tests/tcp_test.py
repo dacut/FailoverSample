@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function
 import failover
 import logging
-from random import SystemRandom
 from select import select
 from six.moves.http_client import (
     HTTPConnection, OK, NOT_FOUND, SERVICE_UNAVAILABLE)
@@ -13,23 +12,10 @@ from threading import Thread, Condition
 from time import sleep
 from unittest import TestCase, main
 
+from .server import create_server, start_server, stop_server
+
 LOOPBACK = "127.0.0.1"
 UNROUTABLE = "192.0.2.1" # RFC 5737 -- TEST-NET-1 space, unroutable globally
-
-_test_port = None
-def get_test_port():
-    global _test_port
-    if _test_port is None:
-        while True:
-            _test_port = SystemRandom().randint(1025, 32767)
-            # Make sure we can't connect to this port.
-            try:
-                con = create_connection(LOCALHOST, _test_port)
-                con.close()
-                # We connected; try another port
-            except:
-                break
-    return _test_port
 
 log = logging.getLogger("test.tcp")
 
@@ -159,8 +145,7 @@ class CheckTCPServiceTest(TestCase):
 
     def test_server(self):
         service = self.start_service()
-        test_port = get_test_port()
-        server = failover.create_healthcheck_server(test_port)
+        server = create_server()
         server.add_component(
             'always-succeed',
             failover.check_tcp_service(LOOPBACK, service.port,
@@ -171,24 +156,23 @@ class CheckTCPServiceTest(TestCase):
                 UNROUTABLE, 80, failover.second(0.1)))
 
         # Run the HTTP server in a separate thread
-        server_thread = Thread(target=server.serve_forever)
-        server_thread.start()
+        start_server(server)
         
         try:
             # always-succeed should always return ok
-            con = HTTPConnection(LOOPBACK, test_port)
+            con = HTTPConnection(LOOPBACK, server.port)
             con.request("GET", "/always-succeed")
             response = con.getresponse()
             self.assertEqual(response.status, OK)
 
             # always-fail should always return service unavailable
-            con = HTTPConnection(LOOPBACK, test_port)
+            con = HTTPConnection(LOOPBACK, server.port)
             con.request("GET", "/always-fail")
             response = con.getresponse()
             self.assertEqual(response.status, SERVICE_UNAVAILABLE)
 
             # A non-existent service should return not found
-            con = HTTPConnection(LOOPBACK, test_port)
+            con = HTTPConnection(LOOPBACK, server.port)
             con.request("GET", "/unknown")
             response = con.getresponse()
             self.assertEqual(response.status, NOT_FOUND)
@@ -198,8 +182,8 @@ class CheckTCPServiceTest(TestCase):
             service.join()
 
             log.info("Exiting health check server")
-            server.shutdown()
-            server_thread.join()
+            stop_server(server)
+            
 
         return
 

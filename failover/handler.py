@@ -108,5 +108,5 @@ def current_handler():
     Returns the current request handler for this thread.
     """
     global thread_local
-    return thread_local.current_handler
+    return getattr(thread_local, "current_handler", None)
 

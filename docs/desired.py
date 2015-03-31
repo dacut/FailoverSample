@@ -36,13 +36,13 @@ server.add_component(
 
 # U5
 mail_check = toggle(
-    start="OK",
+    start=ok,
     to_fail=check_tcp_service(host="1.2.3.4", port=25, timeout=second(10)),
-    to_ok=oneshot(basic_auth=htpasswd_file("/var/lib/healthcheck_users")))
+    to_ok=oneshot(auth=htpasswd_file("/var/lib/healthcheck_users")))
 
 server.add_component(
     name="mail-u5",
-    task=mail_check.get_state,
+    task=mail_check,
     on_post=mail_check.to_ok.fire)
 
 server.run_forever()
