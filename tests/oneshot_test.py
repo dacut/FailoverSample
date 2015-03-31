@@ -18,7 +18,7 @@ class OneshotTest(TestCase):
                     "%(filename)s:%(lineno)d: %(message)s"))
 
     def test_oneshot(self):
-        checker = failover.oneshot()
+        checker = failover.oneshot(name="oneshot1")
         self.assertFalse(checker())
         self.assertFalse(checker())
         
@@ -26,6 +26,11 @@ class OneshotTest(TestCase):
         checker.fire()
         self.assertTrue(checker())
         self.assertFalse(checker())
+
+        # Check the name
+        self.assertEqual(repr(checker), "oneshot1")
+        checker.name = None
+        self.assertTrue(repr(checker).startswith("<failover.oneshot.Oneshot"))
         return
 
     def test_auth(self):

@@ -24,6 +24,23 @@ class HysteresisTest(TestCase):
             format=("%(asctime)s %(module)s [%(levelname)s] "
                     "%(filename)s:%(lineno)d: %(message)s"))
 
+    def test_name(self):
+        def no_op():
+            return True
+
+        checker = failover.hysteresis(task=no_op, name="hyster1",
+                                      ok_after=failover.count(1),
+                                      fail_after=failover.count(1))
+        self.assertEqual(repr(checker), "hyster1")
+
+        checker = failover.hysteresis(task=no_op,
+                                      ok_after=failover.count(1),
+                                      fail_after=failover.count(1))
+        self.assertTrue(repr(checker).startswith(
+            "<failover.hysteresis.Hysteresis"))
+        
+        return
+
     def test_counted_hysteresis(self):
         test_task = TestTask()
         checker = failover.hysteresis(

@@ -16,10 +16,17 @@ class ToggleTest(TestCase):
     def test_toggle(self):
         self.is_ok = False
         self.is_fail = False
+        self.ok_exception = None
+        self.fail_exception = None
 
         def to_ok():
+            if self.ok_exception is not None:
+                raise self.ok_exception
             return self.is_ok
+
         def to_fail():
+            if self.fail_exception is not None:
+                raise self.fail_exception
             return self.is_fail
 
         toggle = failover.toggle(to_ok=to_ok, to_fail=to_fail,
@@ -29,6 +36,11 @@ class ToggleTest(TestCase):
         self.assertTrue(toggle())
         self.assertTrue(toggle())
 
+        # Don't transition if to_fail raises an exception
+        self.fail_exception = ValueError()
+        self.assertTrue(toggle())
+        self.fail_exception = None
+
         # Goto the fail state.
         self.is_fail = True
         self.assertFalse(toggle())
@@ -37,6 +49,11 @@ class ToggleTest(TestCase):
         # Don't transition yet.
         self.is_fail = False
         self.assertFalse(toggle())
+
+        # Don't transition if to_ok raises an exception
+        self.ok_exception = ValueError()
+        self.assertFalse(toggle())
+        self.ok_exception = None
         
         # Transition back now.
         self.is_ok = True
@@ -54,5 +71,10 @@ class ToggleTest(TestCase):
         self.assertTrue(toggle())
         self.assertFalse(toggle())
         self.assertTrue(toggle())
+
+        # Check the name
+        self.assertTrue(repr(toggle).startswith("<failover.toggle.Toggle"))
+        toggle.name = "toggle1"
+        self.assertEqual(repr(toggle), "toggle1")
 
         return

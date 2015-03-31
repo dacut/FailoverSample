@@ -123,7 +123,7 @@ class CheckTCPServiceTest(TestCase):
     def test_basic_connection(self):
         service = self.start_service()
         checker = failover.check_tcp_service(
-            LOOPBACK, service.port, failover.second(10))
+            LOOPBACK, service.port, failover.second(10), name="tcp1")
         
         self.assertTrue(checker())
         service.close()
@@ -131,6 +131,12 @@ class CheckTCPServiceTest(TestCase):
         service.listen()
         self.assertTrue(checker())
         self.assertTrue(checker())
+
+        # Check repr
+        self.assertEqual(repr(checker), "tcp1")
+        checker.name = None
+        self.assertTrue(repr(checker).startswith(
+            "TCPCheck(host='127.0.0.1', port=%d, timeout=" % service.port))
         
         service.exit_requested = True
         service.join()
