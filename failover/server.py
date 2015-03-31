@@ -12,7 +12,7 @@ class FailoverServer(HTTPServer):
             handler.server = self
             return handler
 
-        HTTPServer.__init__(self, server_address, handler)
+        HTTPServer.__init__(self, server_address, create_handler)
         self.get_handlers = {}
         self.post_handlers = {}
         return
@@ -25,17 +25,10 @@ class FailoverServer(HTTPServer):
             self.post_handlers[name] = on_post
         return
 
-def create_healthcheck_server(port, host=None):
+def create_healthcheck_server(port, host=""):
     """
     create_healthcheck_server(port) -> HealthcheckServer
 
     Creates a new health check server listening on the specified TCP port.
     """
-
-    # Create a wrapper which instantiates a FailoverRequestHandler with the
-    # correct component_map.
-    component_map = {}
-    def new_handler(*args, **kw):
-        return FailoverRequestHandler(component_map, *args, **kw)
-    
-    return HTTPServer((host, port), new_handler)
+    return FailoverServer((host, port))
