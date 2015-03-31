@@ -3,7 +3,7 @@ import failover
 import logging
 from select import select
 from six.moves.http_client import (
-    HTTPConnection, OK, NOT_FOUND, SERVICE_UNAVAILABLE)
+    HTTPConnection, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, SERVICE_UNAVAILABLE)
 from socket import (
     AF_INET, create_connection, INADDR_ANY, SOCK_STREAM, socket, SOL_SOCKET,
     SO_REUSEADDR)
@@ -156,10 +156,26 @@ class CheckTCPServiceTest(TestCase):
             'always-succeed',
             failover.check_tcp_service(LOOPBACK, service.port,
                                        failover.second(10)))
+
+        # Add another with an integer time value
         server.add_component(
-            'always-fail',
-            failover.check_tcp_service(
-                UNROUTABLE, 80, failover.second(0.1)))
+            'always-succeed2',
+            failover.check_tcp_service(LOOPBACK, service.port, 10))
+
+        checker = failover.check_tcp_service(
+            UNROUTABLE, 80, failover.second(0.1))
+        server.add_component('always-fail', checker)
+
+        # Make sure checker got a name
+        self.assertEqual(repr(checker), "always-fail")
+
+        # Add a service-name check
+        checker = failover.check_tcp_service(
+            UNROUTABLE, "http", failover.second(0.1))
+        server.add_component('always-fail2', checker)
+
+        # Try adding an un-callable object
+        server.add_component('wrong', 4)
 
         # Run the HTTP server in a separate thread
         start_server(server)
@@ -171,17 +187,29 @@ class CheckTCPServiceTest(TestCase):
             response = con.getresponse()
             self.assertEqual(response.status, OK)
 
+            con.request("GET", "/always-succeed2")
+            response = con.getresponse()
+            self.assertEqual(response.status, OK)
+
             # always-fail should always return service unavailable
-            con = HTTPConnection(LOOPBACK, server.port)
             con.request("GET", "/always-fail")
             response = con.getresponse()
             self.assertEqual(response.status, SERVICE_UNAVAILABLE)
 
+            # HEAD requests should return the same.
+            con.request("HEAD", "/always-fail")
+            response = con.getresponse()
+            self.assertEqual(response.status, SERVICE_UNAVAILABLE)
+
             # A non-existent service should return not found
-            con = HTTPConnection(LOOPBACK, server.port)
             con.request("GET", "/unknown")
             response = con.getresponse()
             self.assertEqual(response.status, NOT_FOUND)
+
+            # Uncallable service should return 500
+            con.request("GET", "/wrong")
+            response = con.getresponse()
+            self.assertEqual(response.status, INTERNAL_SERVER_ERROR)
         finally:
             log.info("Exiting TCP server")
             service.exit_requested = True
@@ -190,8 +218,60 @@ class CheckTCPServiceTest(TestCase):
             log.info("Exiting health check server")
             stop_server(server)
             
-
         return
+
+    def test_reject_invalid_hostname(self):
+        try:
+            failover.check_tcp_service(3.14159, 90, failover.second(1))
+            self.fail("Expected TypeError")
+        except TypeError:
+            pass
+
+    def test_reject_invalid_port(self):
+        for port in [-2, -1, 0, 65536, 131072, "myxlflyx"]:
+            try:
+                failover.check_tcp_service(LOOPBACK, port, failover.second(1))
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+
+        try:
+            failover.check_tcp_service(LOOPBACK, None, failover.second(1))
+            self.fail("Expected TypeError")
+        except TypeError:
+            pass
+
+    def test_reject_invalid_duration(self):
+        try:
+            failover.check_tcp_service(LOOPBACK, 80, failover.second(-1))
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+        try:
+            failover.check_tcp_service(LOOPBACK, 80, -1)
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+        try:
+            failover.check_tcp_service(LOOPBACK, 80, -1.5)
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+        try:
+            failover.check_tcp_service(LOOPBACK, 80, failover.count(1))
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+        try:
+            failover.check_tcp_service(LOOPBACK, 80, [1,2,3])
+            self.fail("Expected TypeError")
+        except TypeError:
+            pass
+
 
 if __name__ == "__main__":
     main()

@@ -66,9 +66,12 @@ def validate_after(after, parameter_name="after"):
 
         if after_unit is count:
             # Don't do anything to the value
-            pass
+            if after.num <= 0:
+                raise ValueError(errmsg)
         elif after_unit is second:
             # Convert the value to seconds
+            if after.num <= 0:
+                raise ValueError(errmsg)
             after = second(0) + after
         else:
             raise ValueError(errmsg)

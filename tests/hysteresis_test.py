@@ -3,6 +3,7 @@ import failover
 import logging
 from sys import stderr
 from time import sleep
+from units import unit
 from unittest import TestCase, main
 
 class TestTask(object):
@@ -124,4 +125,96 @@ class HysteresisTest(TestCase):
         self.assertFalse(checker())
         self.assertFalse(checker())
 
+    def test_alternative_units(self):
+        test_task = TestTask()
+        checker = failover.hysteresis(
+            task=test_task, initial_state=failover.ok,
+            ok_after=5,
+            fail_after=3)
+
+        self.assertTrue(checker())
+        self.assertTrue(checker())
+
+        test_task.result = failover.fail
+        self.assertTrue(checker())      # First failure -- still ok
+        self.assertTrue(checker())      # Second failure -- still ok
+        self.assertFalse(checker())     # Third failure -- transition
+        self.assertFalse(checker())
         
+        test_task.result = failover.ok
+        self.assertFalse(checker())     # First success -- still failed
+        self.assertFalse(checker())     # Second success -- still failed
+        self.assertFalse(checker())     # Third success -- still failed
+        self.assertFalse(checker())     # Fourth success -- still failed
+        self.assertTrue(checker())      # Fifth success -- transition
+        self.assertTrue(checker())
+
+        return
+
+    def test_reject_invalid(self):
+        meter = unit("m")
+
+        for c in [-2, -1, 0]:
+            try:
+                failover.hysteresis(task=None, fail_after=c, ok_after=1)
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+                
+            try:
+                failover.hysteresis(task=None, fail_after=failover.count(c),
+                                    ok_after=1)
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+
+            try:
+                failover.hysteresis(task=None, fail_after=failover.second(c),
+                                    ok_after=1)
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+
+            try:
+                failover.hysteresis(task=None, fail_after=1, ok_after=c)
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+                
+            try:
+                failover.hysteresis(task=None, fail_after=1,
+                                    ok_after=failover.count(c))
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+
+            try:
+                failover.hysteresis(task=None, fail_after=1,
+                                    ok_after=failover.second(c))
+                self.fail("Expected ValueError")
+            except ValueError:
+                pass
+
+        try:
+            failover.hysteresis(task=None, fail_after=meter(1), ok_after=1)
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
+        try:
+            failover.hysteresis(task=None, fail_after="qwerty", ok_after=1)
+            self.fail("Expected TypeError")
+        except TypeError:
+            pass
+
+        try:
+            failover.hysteresis(task=None, fail_after=1, ok_after=meter(1))
+            self.fail("Expected ValError")
+        except ValueError:
+            pass
+
+        try:
+            failover.hysteresis(task=None, fail_after=1, ok_after="zxcvasdf")
+            self.fail("Expected TypeError")
+        except TypeError:
+            pass
