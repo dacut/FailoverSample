@@ -14,20 +14,20 @@ class ToggleTest(TestCase):
                     "%(filename)s:%(lineno)d: %(message)s"))
 
     def test_toggle(self):
-        self.is_ok = False
-        self.is_fail = False
+        self.goto_ok = False
+        self.stay_ok = True
         self.ok_exception = None
         self.fail_exception = None
 
         def to_ok():
             if self.ok_exception is not None:
                 raise self.ok_exception
-            return self.is_ok
+            return self.goto_ok
 
         def to_fail():
             if self.fail_exception is not None:
                 raise self.fail_exception
-            return self.is_fail
+            return self.stay_ok
 
         toggle = Toggle(to_ok=to_ok, to_fail=to_fail, initial_state=ok)
 
@@ -41,12 +41,12 @@ class ToggleTest(TestCase):
         self.fail_exception = None
 
         # Goto the fail state.
-        self.is_fail = True
+        self.stay_ok = False
         self.assertFalse(toggle())
         self.assertFalse(toggle())
 
         # Don't transition yet.
-        self.is_fail = False
+        self.stay_ok = True
         self.assertFalse(toggle())
 
         # Don't transition if to_ok raises an exception
@@ -55,17 +55,18 @@ class ToggleTest(TestCase):
         self.ok_exception = None
         
         # Transition back now.
-        self.is_ok = True
+        self.goto_ok = True
         self.assertTrue(toggle())
         self.assertTrue(toggle())
 
         # No transition again
-        self.is_ok = False
+        self.goto_ok = False
         self.assertTrue(toggle())
         self.assertTrue(toggle())
 
         # Flip flop transitions.
-        self.is_ok = self.is_fail = True
+        self.goto_ok = True
+        self.stay_ok = False
         self.assertFalse(toggle())
         self.assertTrue(toggle())
         self.assertFalse(toggle())
