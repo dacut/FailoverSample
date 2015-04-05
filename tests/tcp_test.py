@@ -122,7 +122,7 @@ class CheckTCPServiceTest(TestCase):
 
     def test_basic_connection(self):
         service = self.start_service()
-        checker = failover.check_tcp_service(
+        checker = failover.TCPCheck(
             LOOPBACK, service.port, failover.second(10), name="tcp1")
         
         self.assertTrue(checker())
@@ -143,7 +143,7 @@ class CheckTCPServiceTest(TestCase):
         return
 
     def test_unroutable(self):
-        checker = failover.check_tcp_service(
+        checker = failover.TCPCheck(
             UNROUTABLE, 80, failover.second(0.1))
 
         self.assertFalse(checker())
@@ -154,15 +154,15 @@ class CheckTCPServiceTest(TestCase):
         server = create_server()
         server.add_component(
             'always-succeed',
-            failover.check_tcp_service(LOOPBACK, service.port,
+            failover.TCPCheck(LOOPBACK, service.port,
                                        failover.second(10)))
 
         # Add another with an integer time value
         server.add_component(
             'always-succeed2',
-            failover.check_tcp_service(LOOPBACK, service.port, 10))
+            failover.TCPCheck(LOOPBACK, service.port, 10))
 
-        checker = failover.check_tcp_service(
+        checker = failover.TCPCheck(
             UNROUTABLE, 80, failover.second(0.1))
         server.add_component('always-fail', checker)
 
@@ -170,7 +170,7 @@ class CheckTCPServiceTest(TestCase):
         self.assertEqual(repr(checker), "always-fail")
 
         # Add a service-name check
-        checker = failover.check_tcp_service(
+        checker = failover.TCPCheck(
             UNROUTABLE, "http", failover.second(0.1))
         server.add_component('always-fail2', checker)
 
@@ -222,7 +222,7 @@ class CheckTCPServiceTest(TestCase):
 
     def test_reject_invalid_hostname(self):
         try:
-            failover.check_tcp_service(3.14159, 90, failover.second(1))
+            failover.TCPCheck(3.14159, 90, failover.second(1))
             self.fail("Expected TypeError")
         except TypeError:
             pass
@@ -230,44 +230,44 @@ class CheckTCPServiceTest(TestCase):
     def test_reject_invalid_port(self):
         for port in [-2, -1, 0, 65536, 131072, "myxlflyx"]:
             try:
-                failover.check_tcp_service(LOOPBACK, port, failover.second(1))
+                failover.TCPCheck(LOOPBACK, port, failover.second(1))
                 self.fail("Expected ValueError")
             except ValueError:
                 pass
 
         try:
-            failover.check_tcp_service(LOOPBACK, None, failover.second(1))
+            failover.TCPCheck(LOOPBACK, None, failover.second(1))
             self.fail("Expected TypeError")
         except TypeError:
             pass
 
     def test_reject_invalid_duration(self):
         try:
-            failover.check_tcp_service(LOOPBACK, 80, failover.second(-1))
+            failover.TCPCheck(LOOPBACK, 80, failover.second(-1))
             self.fail("Expected ValueError")
         except ValueError:
             pass
 
         try:
-            failover.check_tcp_service(LOOPBACK, 80, -1)
+            failover.TCPCheck(LOOPBACK, 80, -1)
             self.fail("Expected ValueError")
         except ValueError:
             pass
 
         try:
-            failover.check_tcp_service(LOOPBACK, 80, -1.5)
+            failover.TCPCheck(LOOPBACK, 80, -1.5)
             self.fail("Expected ValueError")
         except ValueError:
             pass
 
         try:
-            failover.check_tcp_service(LOOPBACK, 80, failover.count(1))
+            failover.TCPCheck(LOOPBACK, 80, failover.count(1))
             self.fail("Expected ValueError")
         except ValueError:
             pass
 
         try:
-            failover.check_tcp_service(LOOPBACK, 80, [1,2,3])
+            failover.TCPCheck(LOOPBACK, 80, [1,2,3])
             self.fail("Expected TypeError")
         except TypeError:
             pass

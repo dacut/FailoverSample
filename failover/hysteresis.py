@@ -6,12 +6,13 @@ from .units import count, second, ok
 from .validation import validate_after
 
 class Hysteresis(object):
-    def __init__(self, task, state, ok_after, fail_after, name=None):
+    def __init__(self, task, initial_state=ok, ok_after=None, fail_after=None,
+                 name=None):
         super(Hysteresis, self).__init__()
         self.task = task
-        self.current_state = state
-        self.ok_after = ok_after
-        self.fail_after = fail_after
+        self.current_state = initial_state
+        self.ok_after = validate_after(ok_after, "ok_after")
+        self.fail_after = validate_after(fail_after, "fail_after")
         self.disagree_count = 0
         self.disagree_start = None
         self.name = name
@@ -82,11 +83,3 @@ class Hysteresis(object):
         else:
             return super(Hysteresis, self).__repr__()
 # end Hysteresis
-
-def hysteresis(task, initial_state=ok, ok_after=None, fail_after=None,
-               name=None):
-    ok_after = validate_after(ok_after, "ok_after")
-    fail_after = validate_after(fail_after, "fail_after")
-    return Hysteresis(task=task, state=initial_state, ok_after=ok_after,
-                      fail_after=fail_after, name=name)
-        

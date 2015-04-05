@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, print_function
 from .background import background
-from .hysteresis import hysteresis
+from .hysteresis import Hysteresis
 from .oneshot import oneshot
 from .server import create_healthcheck_server
-from .tcp import check_tcp_service
+from .tcp import TCPCheck
 from .toggle import toggle
 from .units import second, minute, hour, day, count, ok, fail
 
 __all__ = [
     "background",
-    "hysteresis",
+    "Hysteresis",
     "create_healthcheck_server",
     "oneshot",
-    "check_tcp_service",
     "toggle",
     "second",
     "minute",
@@ -22,5 +21,6 @@ __all__ = [
     "count",
     "ok",
     "fail",
+    "TCPCheck"
 ]
 

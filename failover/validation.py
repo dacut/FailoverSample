@@ -6,6 +6,15 @@ from .units import count, second
 from units.quantity import Quantity
 
 def validate_hostname(hostname, parameter_name="host", optional=False):
+    """
+    validate_hostname(hostname, parameter_name="host", optional=False) -> str
+
+    Verify a given string contains a valid hostname or IPv4/IPv6 address.  An
+    exception is raised (naming the offending parameter via parameter_name) if
+    the string is not a valid hostname or IP address.
+
+    If optional is True, hostname can also be None.
+    """
     errmsg = (parameter_name + " must be a string containing a valid hostname")
 
     if optional:
@@ -22,6 +31,19 @@ def validate_hostname(hostname, parameter_name="host", optional=False):
     return hostname
 
 def validate_port(port, parameter_name="port", optional=False):
+    """
+    validate_port(port, parameter_name="port", optional=False) -> int
+
+    Verify a given parameter is a valid port; this must be an integer in the
+    range 1-65535 (inclusive) or a string containing a valid TCP service name
+    (from /etc/services).  If this is not the case, an exception is raised
+    (naming the offending parameter via parameter_name).
+
+    If a service name was passed in, the return value is the equivalent
+    integer TCP port.
+
+    If optional is True, port can also be None.
+    """
     errmsg = (parameter_name + " must be an integer port number from "
               "1-65535 (inclusive)")
 
@@ -44,6 +66,16 @@ def validate_port(port, parameter_name="port", optional=False):
     return port
 
 def validate_duration(duration, parameter_name="duration"):
+    """
+    validate_duration(duration, parameter_name="duration") -> float
+
+    Verify a given parameter is a valid duration; this must be a non-negative
+    number (int or float) or, preferably, a time quantity from the units
+    library (see failover.units).  If the parameter is not valid, an exception
+    is raised (naming the offending parameter via parameter_name).
+    
+    The return value is a float indicating the duration in seconds.
+    """
     errmsg = (parameter_name + " must be a non-negative time unit or numeric "
               "value in seconds: %r")
     if isinstance(duration, Quantity):
@@ -56,9 +88,19 @@ def validate_duration(duration, parameter_name="duration"):
     else:
         raise TypeError(errmsg % (duration,))
 
-    return duration
+    return float(duration)
 
 def validate_after(after, parameter_name="after"):
+    """
+    validate_after(after, parameter_name="after") -> second/count
+
+    Verify a given parameter is a valid event; this must be a positive count
+    (int or failover.units.count quantity) or a positive time unit (see
+    failover.units).  If the parameter is not valid, an exception is raised
+    (naming the offending parameter via parameter_name).
+
+    The return value is a quantity with either second or count units.
+    """
     errmsg = (parameter_name + " must be a positive time or count unit, "
               "or positive integer count")
     if isinstance(after, Quantity):
