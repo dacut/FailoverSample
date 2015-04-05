@@ -8,7 +8,7 @@ server.add_component(
 # U2
 server.add_component(
     name="mail-u2",
-    task=hysteresis(
+    task=Hysteresis(
         task=TCPCheck(host="1.2.3.4", port=25, timeout=second(10)),
         start=fail,
         ok_after=count(5),
@@ -17,7 +17,7 @@ server.add_component(
 # U3
 server.add_component(
     name="mail-u3",
-    task=hysteresis(
+    task=Hysteresis(
         task=TCPCheck(host="1.2.3.4", port=25, timeout=second(10)),
         start=fail,
         ok_after=minute(1),
@@ -26,8 +26,8 @@ server.add_component(
 # U4
 server.add_component(
     name="mail-u4",
-    task=background(
-        task=hysteresis(
+    task=Background(
+        task=Hysteresis(
             task=TCPCheck(host="1.2.3.4", port=25, timeout=second(10)),
             start="FAIL",
             ok_after=minute(1),
@@ -35,10 +35,10 @@ server.add_component(
         interval=second(5))
 
 # U5
-mail_check = toggle(
+mail_check = Toggle(
     start=ok,
     to_fail=TCPCheck(host="1.2.3.4", port=25, timeout=second(10)),
-    to_ok=oneshot(auth=htpasswd_file("/var/lib/healthcheck_users")))
+    to_ok=Oneshot(auth=htpasswd_file("/var/lib/healthcheck_users")))
 
 server.add_component(
     name="mail-u5",
