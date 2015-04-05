@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function
-import failover
+from failover import ok, Oneshot
 import logging
 from six.moves.http_client import (
     HTTPConnection, OK, NOT_FOUND, SERVICE_UNAVAILABLE, UNAUTHORIZED)
@@ -18,7 +18,7 @@ class OneshotTest(TestCase):
                     "%(filename)s:%(lineno)d: %(message)s"))
 
     def test_oneshot(self):
-        checker = failover.oneshot(name="oneshot1")
+        checker = Oneshot(name="oneshot1")
         self.assertFalse(checker())
         self.assertFalse(checker())
         
@@ -38,7 +38,7 @@ class OneshotTest(TestCase):
         def dummy_auth():
             return self.auth_result
 
-        checker = failover.oneshot(default_state=failover.ok, auth=dummy_auth)
+        checker = Oneshot(default_state=ok, auth=dummy_auth)
         self.assertTrue(checker())
         self.assertTrue(checker())
         
@@ -58,7 +58,7 @@ class OneshotTest(TestCase):
         def dummy_auth():
             return self.auth_result
 
-        checker = failover.oneshot(default_state=failover.ok, auth=dummy_auth)
+        checker = Oneshot(default_state=ok, auth=dummy_auth)
 
         server = create_server()
         start_server(server)

@@ -37,5 +37,3 @@ class Oneshot(object):
         else:
             return super(Oneshot, self).__repr__()
 
-def oneshot(default_state=fail, auth=None, name=None):
-    return Oneshot(default_state=default_state, auth=auth, name=name)

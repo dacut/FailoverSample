@@ -2,7 +2,7 @@
 from __future__ import absolute_import, print_function
 from .background import Background
 from .hysteresis import Hysteresis
-from .oneshot import oneshot
+from .oneshot import Oneshot
 from .server import create_healthcheck_server
 from .tcp import TCPCheck
 from .toggle import toggle
@@ -12,7 +12,7 @@ __all__ = [
     "Background",
     "Hysteresis",
     "create_healthcheck_server",
-    "oneshot",
+    "Oneshot",
     "toggle",
     "second",
     "minute",
