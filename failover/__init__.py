@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, print_function
-from .background import background
+from .background import Background
 from .hysteresis import Hysteresis
 from .oneshot import oneshot
 from .server import create_healthcheck_server
@@ -9,7 +9,7 @@ from .toggle import toggle
 from .units import second, minute, hour, day, count, ok, fail
 
 __all__ = [
-    "background",
+    "Background",
     "Hysteresis",
     "create_healthcheck_server",
     "oneshot",

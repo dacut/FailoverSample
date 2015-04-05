@@ -7,14 +7,15 @@ from threading import Condition, Thread
 
 log = getLogger("failover.background")
 
-class BackgroundCheck(Thread):
+class Background(Thread):
     def __init__(self, task, interval, start=ok):
-        super(BackgroundCheck, self).__init__()
+        super(Background, self).__init__()
         self.task = task
         self.state = start
-        self.interval = interval
+        self.interval = validate_duration(interval, "interval")
         self.lock = Condition()
         self.exit_requested = False
+        self.start()
         return
 
     def run(self):
@@ -43,8 +44,3 @@ class BackgroundCheck(Thread):
         self.join()
         return
 
-def background(task, interval, start=ok):
-    interval = validate_duration(interval, "interval")
-    result = BackgroundCheck(task=task, interval=interval, start=start)
-    result.start()
-    return result

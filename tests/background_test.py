@@ -1,12 +1,12 @@
 from __future__ import absolute_import, print_function
-import failover
+from failover import Background, fail, ok, second
 import logging
 from sys import stderr
 from time import sleep
 from unittest import TestCase, main
 
 class BackgroundTask(object):
-    def __init__(self, state=failover.ok):
+    def __init__(self, state=ok):
         super(BackgroundTask, self).__init__()
         self.state = state
         self.exception = None
@@ -28,8 +28,7 @@ class BackgroundTest(TestCase):
 
     def test_background(self):
         task = BackgroundTask()
-        checker = failover.background(
-            task=task, interval=failover.second(0.1))
+        checker = Background(task=task, interval=second(0.1))
 
         # Check function should be called even if no other activity is
         # occurring
@@ -39,7 +38,7 @@ class BackgroundTest(TestCase):
         self.assertTrue(checker())
 
         # If the checker starts failing, we should not see the result instantly
-        task.state = failover.fail
+        task.state = fail
         self.assertTrue(checker())
 
         # But if we sleep, it should then fail
@@ -51,8 +50,7 @@ class BackgroundTest(TestCase):
 
     def test_exception(self):
         task = BackgroundTask()
-        checker = failover.background(
-            task=task, interval=failover.second(0.1))
+        checker = Background(task=task, interval=second(0.1))
 
         sleep(0.11)
         self.assertTrue(checker())
