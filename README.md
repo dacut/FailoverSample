@@ -119,6 +119,7 @@ server.add_component(
 server.run_forever()
 ```
 
+## TODO ##
 
-
- 
+* [ ] Implement auth library.
+* [ ] Implement logic (and/or/not) library.
