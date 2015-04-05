@@ -6,8 +6,27 @@ from .units import count, second, ok
 from .validation import validate_after
 
 class Hysteresis(object):
-    def __init__(self, task, initial_state=ok, ok_after=None, fail_after=None,
-                 name=None):
+    """
+    Hysteresis(task, initial_state=ok, ok_after=count(1), fail_after=count(1),
+               name=None)
+
+    Create a Hysteresis object that imposes a delay in the state change of an
+    underlying health check task.
+
+    To switch the state from ok to fail, the underlying task must consistently
+    fail for the duration specified by fail_after (either a count or time).
+    Likewise, to switch the state from fail to ok, the underlying task must
+    consistently succeed for the duration specificed by ok_after (count or
+    time).
+
+    If the underlying task does meet these criteria, the current state is
+    retained.
+
+    Exceptions raised by the underlying task are logged and dropped.  These
+    effects are ignored by Hysteresis.
+    """
+    def __init__(self, task, initial_state=ok, ok_after=count(1),
+                 fail_after=count(1), name=None):
         super(Hysteresis, self).__init__()
         self.task = task
         self.current_state = initial_state
