@@ -1,4 +1,4 @@
-server = create_healthcheck_server(port=8080)
+server = HealthCheckServer(port=8080)
 
 # U1
 server.add_component(

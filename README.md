@@ -1,13 +1,20 @@
 # FailoverSample
 Sample failover scripts for aggregating health checks.
 
-## Use cases ##
+## Examples ##
 
-*   U1: Simple TCP IsHealthy
+*   Example 1: Simple TCP IsHealthy
 
-    Upon receiving a health check request, query a backend TCP service to 
-    see if we can connect within a designated timeout.  Return `OK` if we
-    can, `FAIL` if not.
+    Upon receiving a health check request, query a mail server to see if we
+    can connect within 10 seconds.  Return `OK` if we can, `FAIL` if otherwise.
+
+    ```python
+    server = HealthCheckServer(port=8080)
+    server.add_component("example-1",
+                         task=TCPCheck(host="192.0.2.1", port=25,
+                                       timeout=second(10)))
+    server.run_forever()
+    ```
 
 *   U2: TCP IsHealthy Counted Hysteresis
 
