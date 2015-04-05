@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function
-import failover
+from failover import ok, Toggle
 import logging
 from sys import stderr
 from unittest import TestCase, main
@@ -29,8 +29,7 @@ class ToggleTest(TestCase):
                 raise self.fail_exception
             return self.is_fail
 
-        toggle = failover.toggle(to_ok=to_ok, to_fail=to_fail,
-                                 initial_state=failover.ok)
+        toggle = Toggle(to_ok=to_ok, to_fail=to_fail, initial_state=ok)
 
         # Don't transition without a toggle.
         self.assertTrue(toggle())

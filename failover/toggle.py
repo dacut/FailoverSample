@@ -4,11 +4,11 @@ from logging import getLogger
 from .units import ok, fail
 
 class Toggle(object):
-    def __init__(self, to_fail, to_ok, state, name=None):
+    def __init__(self, to_fail, to_ok, initial_state=ok, name=None):
         super(Toggle, self).__init__()
         self.to_fail = to_fail
         self.to_ok = to_ok
-        self.state = state
+        self.state = initial_state
         self.name = name
         return
 
@@ -38,7 +38,3 @@ class Toggle(object):
             return self.name
         else:
             return super(Toggle, self).__repr__()
-
-def toggle(to_fail, to_ok, initial_state=ok, name=None):
-    return Toggle(to_fail=to_fail, to_ok=to_ok, state=initial_state, name=name)
-
