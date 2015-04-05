@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function
-import failover
+from failover import HealthCheckServer
 from random import SystemRandom
 from threading import Thread, Condition
 
@@ -21,7 +21,7 @@ def create_server(port=None):
     if port is None:
         port = get_test_port()
     
-    server = failover.create_healthcheck_server(port)
+    server = HealthCheckServer(port)
     server.port = port
     return server
 

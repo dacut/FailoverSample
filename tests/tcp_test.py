@@ -152,6 +152,14 @@ class CheckTCPServiceTest(TestCase):
     def test_server(self):
         service = self.start_service()
         server = create_server()
+
+        # Make sure we reject invalid component names
+        try:
+            server.add_component('/foo', None)
+            self.fail("Expected ValueError")
+        except ValueError:
+            pass
+
         server.add_component(
             'always-succeed',
             failover.TCPCheck(LOOPBACK, service.port,

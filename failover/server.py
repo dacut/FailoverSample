@@ -2,8 +2,14 @@
 from __future__ import absolute_import, print_function
 from six.moves.BaseHTTPServer import HTTPServer
 
-class FailoverServer(HTTPServer):
-    def __init__(self, server_address):
+class HealthCheckServer(HTTPServer):
+    """
+    HealthCheckServer(port, host="")
+
+    Create a HealthCheckServer (an HTTP server) listening on the given port
+    (and interface, if specified).
+    """
+    def __init__(self, port, host=""):
         # Create a function which instantiates the handler with a link back
         # to this server.
         def create_handler(*args, **kw):
@@ -12,12 +18,26 @@ class FailoverServer(HTTPServer):
             handler.server = self
             return handler
 
-        HTTPServer.__init__(self, server_address, create_handler)
+        HTTPServer.__init__(self, (host, port), create_handler)
         self.get_handlers = {}
         self.post_handlers = {}
         return
     
     def add_component(self, name, task, on_post=None):
+        """
+        hcs.add_component(name, task, on_post=None)
+
+        Add the specified health check task at the specified path name.
+        name must be a string without leading slashes.  task must be a callable
+        object.
+
+        If on_post is specified, it specifies an alternate handler to invoke
+        on POST requests.
+        """
+
+        if name.startswith("/"):
+            raise ValueError("name cannot start with a slash")
+
         if getattr(task, "name", None) is None:
             try:
                 task.name = name
@@ -30,11 +50,3 @@ class FailoverServer(HTTPServer):
         if on_post:
             self.post_handlers[name] = on_post
         return
-
-def create_healthcheck_server(port, host=""):
-    """
-    create_healthcheck_server(port) -> HealthcheckServer
-
-    Creates a new health check server listening on the specified TCP port.
-    """
-    return FailoverServer((host, port))

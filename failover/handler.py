@@ -42,7 +42,7 @@ class FailoverRequestHandler(BaseHTTPRequestHandler):
         """
         Routes an update to the appropriate component.
         """
-        log = getLogger("failover.get")
+        log = getLogger("failover.post")
         return self.select_and_run_component(self.server.post_handlers, log)
 
     def select_and_run_component(self, component_map, log):
