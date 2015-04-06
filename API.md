@@ -21,8 +21,8 @@ the task onto the HTTP server; it must not have leading slashes ('/').
 `task` is a callable object invoked on GET or HEAD requests.  It must
 return a boolean value (or a value convertible to a Python `bool`), with
 `True` indicating the health check passed, `False` indicating that it failed.
-Use `failover.units.ok` and `failover.units.fail` as self-documenting
-shortcuts to avoid the mental overhead on this convention.
+Use (`ok`)[#ok] and (`fail`)[#fail] as self-documenting shortcuts to avoid
+the mental overhead on this convention.
 
 If not `None`, `on_post` is a callable to execute on POST requests.
 
@@ -45,7 +45,7 @@ integer/float number of seconds).
 | --------- | -----------
 | `host`    | The hostname, IPv4 address, or IPv6 address of the host to test (string).
 | `port`    | The servicename (string) or TCP port (integer, 1-65535) to test.
-| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity (see [`second`](#second)); integers and floats are assumed to be seconds.
+| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers and floats are assumed to be seconds.
 | `source_host` | If not `None`, the interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
 | `source_port` | If not `None`, the port to bind the connecting socket to; this must be an integer in the range 1-65535.
 | `name` | If not `None`, the string to return in `repr()` calls.
@@ -76,8 +76,8 @@ underlying health check task given by the `task` parameter.
 | --------- | -----------
 | `task`    | The underlying health check task to call.
 | `initial_state` | The initial state of the `Hysteresis` object (bool).
-| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#count) quantity or a time quantity (see [`second`](#second)); integers are also accepted and assumed to be counts, but this is not recommended.
-| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity (see [`second`](#second)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#count) quantity or a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers are also accepted and assumed to be counts, but this is not recommended.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
 ## Unit Definitions ##
@@ -125,3 +125,13 @@ import units, units.predefined
 units.predefined.define_units()
 day = units.unit('day')
 ```
+
+### `ok` ###
+
+Same as `True`.  This provides a self-documenting shortcut in health check
+tasks to make the intent explicit.
+
+### `fail` ###
+
+Same as `False`.  This provides a self-documenting shortcut in health check
+tasks to make the intent explicit.
