@@ -28,7 +28,7 @@ class BackgroundTest(TestCase):
 
     def test_background(self):
         task = BackgroundTask()
-        checker = Background(task=task, interval=second(0.1))
+        checker = Background(task=task, delay=second(0.1))
 
         # Check function should be called even if no other activity is
         # occurring
@@ -50,7 +50,7 @@ class BackgroundTest(TestCase):
 
     def test_exception(self):
         task = BackgroundTask()
-        checker = Background(task=task, interval=second(0.1))
+        checker = Background(task=task, delay=second(0.1))
 
         sleep(0.11)
         self.assertTrue(checker())

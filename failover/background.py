@@ -9,7 +9,7 @@ log = getLogger("failover.background")
 
 class Background(Thread):
     """
-    Background(task, interval, start=ok)
+    Background(task, delay, start=ok)
 
     Create a Background object that invokes an underlying health check task
     asynchronously and saves the state.
@@ -22,11 +22,11 @@ class Background(Thread):
     these requests will prevent the server from filling up with health check
     tasks.
     """
-    def __init__(self, task, interval, initial_state=ok, start_thread=True):
+    def __init__(self, task, delay, initial_state=ok, start_thread=True):
         super(Background, self).__init__()
         self.task = task
         self.state = initial_state
-        self.interval = validate_duration(interval, "interval")
+        self.delay = validate_duration(delay, "delay")
         self.lock = Condition()
         self.exit_requested = False
 
@@ -38,7 +38,7 @@ class Background(Thread):
         with self.lock:
             while not self.exit_requested:
                 # Allow another thread to request this thread to stop.
-                self.lock.wait(self.interval)
+                self.lock.wait(self.delay)
                 if self.exit_requested:
                     break
 
