@@ -26,6 +26,10 @@ the mental overhead on this convention.
 
 If not `None`, `on_post` is a callable to execute on POST requests.
 
+* Returns: `None`
+* Throws: `ValueError` if name is invalid
+
+
 ## Health Check Task API ##
 
 ### `TCPCheck` ###
@@ -49,6 +53,14 @@ integer/float number of seconds).
 | `source_host` | If not `None`, the interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
 | `source_port` | If not `None`, the port to bind the connecting socket to; this must be an integer in the range 1-65535.
 | `name` | If not `None`, the string to return in `repr()` calls.
+
+* Throws: `TypeError` if `host` is not a string; `port` is not a string or
+  integer; `timeout` is not a quantity, integer, or float; `source_host` is
+  not a string or `None`; or `source_port` is not a string, integer, or
+  `None`.
+* Throws: `ValueError` if `port` or `service_port` is not a known service
+  name or is outside the range 1-65535; or `timeout` is not a time quantity or
+  is less than zero.
 
 ### `Hysteresis` ###
 
@@ -80,6 +92,11 @@ underlying health check task given by the `task` parameter.
 | `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers are also accepted and assumed to be counts, but this is not recommended.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
+* Throws: `TypeError` if `fail_after` or `ok_after` are not quantities or
+  integers.
+* Throws: `ValueError` if `fail_after` or `ok_after` are quantities but not
+  time or count quantities, or are less than zero.
+
 ### `Background` ###
 
 Execute health check tasks asynchronously.
@@ -110,9 +127,55 @@ explicitly set to `False`.
 | `initial_state` | The initial state of the `Background` object (bool).  This is state is only used before the first completion of `task`.
 | `start_thread` | Whether the task should be started upon the completion of the constructor.  Subclasses should pass `False` here and invoke `self.start()` themselves to avoid starting the thread before construction has finished.
 
-### Method: `stop()` ###
+* Throws: if `delay` is not a quantity, integer, or float.
+* Throws: `ValueError` if `delay` is not a time quantity or is less than zero.
+
+
+#### Method: `stop()` ####
 
 Notifies the background thread to stop running and waits for it to exit.
+
+* Returns: `None`
+* Throws: Does not normally throw.
+
+### `Oneshot` ###
+
+A health check task that stays in the given state until fired.  Once fired,
+calling the object returns the opposite result exactly once.
+
+This is typically combined with a [`Toggle`](#toggle) object to enable manual
+failback on a task.
+
+Firing a task can invoke an optional authentication and authorization handler
+to verify that the caller has the proper credentials and authority to change
+the state.
+
+#### Constructor: `Oneshot(default_state=fail, auth=None, name=None)` ####
+
+Create a new `Oneshot` object.
+
+| Parameter | Description
+| --------- | -----------
+| `default_state` | The default state to return (bool).
+| `auth` | The authentication and authorization handler to invoke when `fire()` is called.  This handler should return `True` or `ok` if the call should proceed; `False` or `fail` otherwise.
+| `name` | If not `None`, the string to return in `repr()` calls.
+
+* Throws: Does not normally throw.
+
+#### Method: `fire()` ####
+
+If an authentication and authorization handler has been set, it is invoked.
+If it fails, then no action is taken (aside from providing any existing HTTP
+handler with a "401 Unauthorized" response) and `False` is returned.
+
+If an authentication and authorization handler has not set or succeeds, this
+object becomes armed (i.e. it will return the opposite of `default_state` the
+next time it is invoked), any existing HTTP handler is provided a "200 Ok"
+response, and `True` is returned.
+
+* Returns: `True` if successfully armed, `False` otherwise.
+* Throws: Does not normally throw, but will leak exceptions from the
+  authentication and authorization handler.
 
 ## Unit Definitions ##
 
