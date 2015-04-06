@@ -22,14 +22,16 @@ class Background(Thread):
     these requests will prevent the server from filling up with health check
     tasks.
     """
-    def __init__(self, task, interval, start=ok):
+    def __init__(self, task, interval, initial_state=ok, start_thread=True):
         super(Background, self).__init__()
         self.task = task
-        self.state = start
+        self.state = initial_state
         self.interval = validate_duration(interval, "interval")
         self.lock = Condition()
         self.exit_requested = False
-        self.start()
+
+        if start_thread:
+            self.start()
         return
 
     def run(self):
