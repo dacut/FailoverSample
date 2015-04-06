@@ -37,20 +37,14 @@ integer port number from 1-65535) combination.  The check succeeds if the
 server accepts the connection within `timeout` (a time unit quantity or
 integer/float number of seconds).
 
-If `source_host` is not `None`, it must be a string hostname or IPv4/IPv6
-address indicating the interface to connect from.  If `source_port` is not
-`None`, it must be a string servicename or integer port number from 1-65535
-to bind the connecting socket to.
-
-If `name` is not `None`, it is used when `repr()` is called on the object.
-
 | Parameter | Description
 | --------- | -----------
 | `host`    | The hostname, IPv4 address, or IPv6 address of the host to test (string).
 | `port`    | The servicename (string) or TCP port (integer, 1-65535) to test.
 | `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity (see [`second`](#second)); integers and floats are assumed to be seconds.
-| `source_host` | \[Default: `None`\] The interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
-| `source_port` | \[Default: `None`\] The port to bind the connecting socket to; this must be an integer in the range 1-65535.
+| `source_host` | If not `None`, the interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
+| `source_port` | If not `None`, the port to bind the connecting socket to; this must be an integer in the range 1-65535.
+| `name` | If not `None`, the string to return in `repr()` calls.
 
 ## `Hysteresis` ##
 
@@ -74,6 +68,54 @@ duration (either in time or number of checks).
 Create a `Hysteresis` object that imposes a delay in the state change of the
 underlying health check task given by the `task` parameter.
 
-To switch the state from ok to fail, the underlying task must consistently
-fail for the duration specified by `fail_after` (either a count or time
-quantity; integers are assumed to be counts).
+| Parameter | Description
+| --------- | -----------
+| `task`    | The underlying health check task to call.
+| `initial_state` | The initial state of the `Hysteresis` object (bool).
+| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#count) quantity or a time quantity (see [`second`](#second)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity (see [`second`](#second)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `name` | If not `None`, the string to return in `repr()` calls.
+
+## `count` ##
+
+This is an explicit count unit from the [units](https://pypi.python.org/pypi/units/) library.  It is defined as:
+```python
+import units
+count = units.unit('count')
+```
+
+## `second` ##
+
+This is the SI second unit from the [units](https://pypi.python.org/pypi/units/) library.  It is defined as:
+```python
+import units, units.predefined
+units.predefined.define_units()
+second = units.unit('s')
+```
+
+## `minute` ##
+
+This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 60 seconds.  It is defined as:
+```python
+import units, units.predefined
+units.predefined.define_units()
+minute = units.unit('min')
+```
+
+## `hour` ##
+
+This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 60 minutes or 3600 seconds.  It is defined as:
+```python
+import units, units.predefined
+units.predefined.define_units()
+hour = units.unit('hour')
+```
+
+## `day` ##
+
+This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 24 hours or 1440 minutes or 86400 seconds.  It is defined as:
+```python
+import units, units.predefined
+units.predefined.define_units()
+day = units.unit('day')
+```
