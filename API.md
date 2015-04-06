@@ -49,7 +49,7 @@ integer/float number of seconds).
 | --------- | -----------
 | `host`    | The hostname, IPv4 address, or IPv6 address of the host to test (string).
 | `port`    | The servicename (string) or TCP port (integer, 1-65535) to test.
-| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers and floats are assumed to be seconds.
+| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity ([`second`](#type-second), [`minute`](#type-minute), [`hour`](#type-hour), or [`day`](#type-day)); integers and floats are assumed to be seconds.
 | `source_host` | If not `None`, the interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
 | `source_port` | If not `None`, the port to bind the connecting socket to; this must be an integer in the range 1-65535.
 | `name` | If not `None`, the string to return in `repr()` calls.
@@ -88,8 +88,8 @@ underlying health check task given by the `task` parameter.
 | --------- | -----------
 | `task`    | The underlying health check task to call.
 | `initial_state` | The initial state of the `Hysteresis` object (bool).
-| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#typecount) quantity or a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers are also accepted and assumed to be counts, but this is not recommended.
-| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#typecount) quantity or a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#type-count) quantity or a time quantity ([`second`](#type-second), [`minute`](#type-minute), [`hour`](#type-hour), or [`day`](#type-day)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#type-count) quantity or a time quantity ([`second`](#type-second), [`minute`](#type-minute), [`hour`](#type-hour), or [`day`](#type-day)); integers are also accepted and assumed to be counts, but this is not recommended.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
 * Throws: `TypeError` if `fail_after` or `ok_after` are not quantities or
@@ -123,7 +123,7 @@ explicitly set to `False`.
 | Parameter | Description
 | --------- | -----------
 | `task`    | The underlying health check task to call.
-| `delay` | The delay between successive calls to `task`.  This must be a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers and floats are assumed to be seconds.  The interval between task executions is the total time to execute the task **plus** this delay.
+| `delay` | The delay between successive calls to `task`.  This must be a time quantity ([`second`](#type-second), [`minute`](#type-minute), [`hour`](#type-hour), or [`day`](#type-day)); integers and floats are assumed to be seconds.  The interval between task executions is the total time to execute the task **plus** this delay.
 | `initial_state` | The initial state of the `Background` object (bool).  This is state is only used before the first completion of `task`.
 | `start_thread` | Whether the task should be started upon the completion of the constructor.  Subclasses should pass `False` here and invoke `self.start()` themselves to avoid starting the thread before construction has finished.
 
