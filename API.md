@@ -80,6 +80,40 @@ underlying health check task given by the `task` parameter.
 | `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers are also accepted and assumed to be counts, but this is not recommended.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
+### `Background` ###
+
+Execute health check tasks asynchronously.
+
+This is used to cache health check results that may be expensive to compute.
+For example, an application server may choose to implement checks on each of
+its dependencies, taking upwards of a minute to fully execute.  Meanwhile, a
+load balancer fronting the server might be hard-wired to query the application
+server every 5 seconds; using a `Background` object to proxy these requests will
+prevent the server from filling up with health check tasks.
+
+The Background class derives from [`threading.Thread`](https://docs.python.org/2/library/threading.html#thread-objects).
+
+#### Constructor: `Background(task, interval, initial_state=ok, start_thread=True)` ####
+
+Create a new `Background` object to repeatedly invoke a task asynchronously.
+
+Note that `Background` objects will not invoke more than one instance of the
+task at a time.
+
+The thread is automatically started unless the `start_thread` parameter is
+explicitly set to `False`.
+
+| Parameter | Description
+| --------- | -----------
+| `task`    | The underlying health check task to call.
+| `delay` | The delay between successive calls to `task`.  This must be a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers and floats are assumed to be seconds.  The interval between task executions is the total time to execute the task **plus** this delay.
+| `initial_state` | The initial state of the `Background` object (bool).  This is state is only used before the first completion of `task`.
+| `start_thread` | Whether the task should be started upon the completion of the constructor.  Subclasses should pass `False` here and invoke `self.start()` themselves to avoid starting the thread before construction has finished.
+
+### Method: `stop()` ###
+
+Notifies the background thread to stop running and waits for it to exit.
+
 ## Unit Definitions ##
 
 ### `count` ###
