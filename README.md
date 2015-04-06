@@ -16,7 +16,7 @@ server = HealthCheckServer(port=8080)
 server.add_component(
     "example-1",
     task=TCPCheck(host="192.0.2.1", port=25, timeout=second(10)))
-server.run_forever()
+server.serve_forever()
 ```
 
 ### Example 2: TCP check with counted hysteresis ###
@@ -40,7 +40,7 @@ server.add_component(
         initial_state=fail,
         ok_after=count(5),
         fail_after=count(20)))
-server.run_forever()
+server.serve_forever()
 ```
 
 ### Example 3: TCP check with time-based hysteresis ###
@@ -64,7 +64,7 @@ server.add_component(
         initial_state=fail,
         ok_after=minute(1),
         fail_after=minute(2)))
-server.run_forever()
+server.serve_forever()
 ```
 
 ### Example 4: Asynchronous TCP checks ###
@@ -88,14 +88,14 @@ server.add_component(
             ok_after=count(2),
             fail_after=count(2)),
         interval=minute(3)))
-server.run_forever()
+server.serve_forever()
 ```
 
 ### Example 5: TCP failover with manual fail-back ###
 
 Start in the `OK` state.  Upon receiving a health check request, query a
-mail server to see if we can connect within 10 seconds.  Upon ten consecutive
-failures, enter the `FAIL` state.
+mail server to see if we can connect within 10 seconds.  If we fail for five
+minutes, enter the `FAIL` state.
 
 When in the `FAIL` state, wait for an authorized user to POST a reset request
 before switching back to the `OK` state.
@@ -103,25 +103,22 @@ before switching back to the `OK` state.
 ```python
 from failover import *
 server = HealthCheckServer(port=8080)
-
-mail_check = Toggle(
-    initial_state=ok,
-    to_fail=Hysteresis(
-        task=TCPCheck(host="192.0.2.1", port=25, timeout=second(10)),
-        initial_state=ok,
-        ok_after=count(1),
-        fail_after=count(10)),
-    to_ok=Oneshot(auth=htpasswd_file("/var/lib/healthcheck_users")))
-
+reset = Oneshot(auth=ApachePasswdFileCheck("/var/lib/healthcheck/users"))
 server.add_component(
-    name="mail-u5",
-    task=mail_check,
-    on_post=mail_check.to_ok.fire)
-
-server.run_forever()
+    name="example-5",
+    task=Toggle(
+        initial_state=ok,
+        to_fail=Hysteresis(
+            task=TCPCheck(host="192.0.2.1", port=25, timeout=second(10)),
+            initial_state=ok,
+            fail_after=minute(5))
+        to_ok=reset),
+    on_post=reset.fire)
+server.serve_forever()
 ```
 
 ## TODO ##
 
 * [ ] Implement auth library.
 * [ ] Implement logic (and/or/not) library.
+* [ ] Handler should return 400 for broken POSTs.
