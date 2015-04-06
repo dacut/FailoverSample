@@ -2,17 +2,19 @@
 
 The public API is entirely available in the `failover` package.
 
-## `HealthCheckServer` ##
+## Server API ##
+
+### `HealthCheckServer` ###
 
 An HTTP server that supports adding health check components.  This is tightly
 coupled with the (private) handler class.
 
-### Constructor: `HealthCheckServer(port, host="")` ###
+#### Constructor: `HealthCheckServer(port, host="")` ####
 
 Create a new `HealthCheckServer` listenting on the specified port (and
 interface, if desired).
 
-### Method: `add_component(name, task, on_post=None)` ###
+#### Method: `add_component(name, task, on_post=None)` ####
 
 Add a health check task.  `name` (string) is the relative URL path to mount
 the task onto the HTTP server; it must not have leading slashes ('/').
@@ -24,12 +26,14 @@ shortcuts to avoid the mental overhead on this convention.
 
 If not `None`, `on_post` is a callable to execute on POST requests.
 
-## `TCPCheck` ##
+## Health Check Task API ##
+
+### `TCPCheck` ###
 
 A health check task that checks whether a TCP service is accepting
 connections.
 
-### Constructor: `TCPCheck(host, port, timeout, source_host=None, source_port=None, name=None)` ###
+#### Constructor: `TCPCheck(host, port, timeout, source_host=None, source_port=None, name=None)` ####
 
 Create a new `TCPCheck` instance that connects to the specified `host`
 (string hostname or IPv4/IPv6 address) and `port` (string servicename or
@@ -46,7 +50,7 @@ integer/float number of seconds).
 | `source_port` | If not `None`, the port to bind the connecting socket to; this must be an integer in the range 1-65535.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
-## `Hysteresis` ##
+### `Hysteresis` ###
 
 A health check task that adds hysteresis around another health check task.
 
@@ -63,7 +67,7 @@ determination:  a failover/failback action is taken only when the
 underlying health check has been seen to consistently fail/pass beyond a set
 duration (either in time or number of checks).
 
-### Constructor: `Hysteresis(task, initial_state=ok, ok_after=count(1), fail_after=count(1), name=None)` ###
+#### Constructor: `Hysteresis(task, initial_state=ok, ok_after=count(1), fail_after=count(1), name=None)` ####
 
 Create a `Hysteresis` object that imposes a delay in the state change of the
 underlying health check task given by the `task` parameter.
@@ -76,7 +80,9 @@ underlying health check task given by the `task` parameter.
 | `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity (see [`second`](#second)); integers are also accepted and assumed to be counts, but this is not recommended.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
-## `count` ##
+## Unit Definitions ##
+
+### `count` ###
 
 This is an explicit count unit from the [units](https://pypi.python.org/pypi/units/) library.  It is defined as:
 ```python
@@ -84,7 +90,7 @@ import units
 count = units.unit('count')
 ```
 
-## `second` ##
+### `second` ###
 
 This is the SI second unit from the [units](https://pypi.python.org/pypi/units/) library.  It is defined as:
 ```python
@@ -93,7 +99,7 @@ units.predefined.define_units()
 second = units.unit('s')
 ```
 
-## `minute` ##
+### `minute` ###
 
 This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 60 seconds.  It is defined as:
 ```python
@@ -102,7 +108,7 @@ units.predefined.define_units()
 minute = units.unit('min')
 ```
 
-## `hour` ##
+### `hour` ###
 
 This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 60 minutes or 3600 seconds.  It is defined as:
 ```python
@@ -111,7 +117,7 @@ units.predefined.define_units()
 hour = units.unit('hour')
 ```
 
-## `day` ##
+### `day` ###
 
 This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 24 hours or 1440 minutes or 86400 seconds.  It is defined as:
 ```python
