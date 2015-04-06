@@ -8,7 +8,7 @@ class Toggle(object):
     Toggle(to_fail, to_ok, initial_state=ok, name=None)
 
     Create a Toggle object that transitions from ok-to-fail or fail-to-ok
-    according to an underlying task.
+    according to separate underlying tasks.
 
     When the object is called and it is currently in the ok state, the to_fail
     task is called; if it fails, the state changes to fail.  The new state

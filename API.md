@@ -7,7 +7,12 @@ The public API is entirely available in the `failover` package.
 ### Class HealthCheckServer ###
 
 An HTTP server that supports adding health check components.  This is tightly
-coupled with the (private) handler class.
+coupled with the (private) handler class and is derived from
+[`BaseHTTPServer.HTTPServer`](https://docs.python.org/2/library/basehttpserver.html).
+
+After creating a `HealthCheckServer` and adding components to it, the
+[`serve_forever()`](https://docs.python.org/2/library/socketserver.html#server-objects) method must be invoked to start the server.  It may be stopped by
+invoking `shutdown()` from a separate thread.
 
 #### Constructor: `HealthCheckServer(port, host="")` ####
 
@@ -143,7 +148,7 @@ Notifies the background thread to stop running and waits for it to exit.
 A health check task that stays in the given state until fired.  Once fired,
 calling the object returns the opposite result exactly once.
 
-This is typically combined with a [`Toggle`](#classtoggle) object to enable manual
+This is typically combined with a [`Toggle`](#class-toggle) object to enable manual
 failback on a task.
 
 Firing a task can invoke an optional authentication and authorization handler
@@ -176,6 +181,60 @@ response, and `True` is returned.
 * Returns: `True` if successfully armed, `False` otherwise.
 * Throws: Does not normally throw, but will leak exceptions from the
   authentication and authorization handler.
+
+
+### Class Toggle ###
+
+A health check that transitions from ok-to-fail or fail-to-ok according to
+separate underlying task.
+
+When the object is called and it is currently in the ok state, the `to_fail`
+task is called; if it fails, the state changes to fail.  The new state is
+returned.
+
+When the object is called and it is currently in the fail state, the `to_ok`
+task is called; if it succeeds, the state changes to ok.  The new state is
+returned.
+
+This is typically used to implement failover with manual fail-back rules.
+For example, `to_fail` will invoke the actual check; once the underlying
+service fails, this will stay in the fail state.  The `to_ok` task is a
+[`Oneshot`](#class-oneshot) object that is fired by a human.  Only when the
+human intervenes and resets the toggle (through an HTTP POST) will the
+service failback.
+
+Here's a complete example which checks a mail server (smtp) with a 10 second
+timeout, failing after it has been down for 5 minutes and failing back when
+an administrator intervenes.
+```python
+from failover import (
+    HealthCheckServer, Hysteresis, minute, Oneshot, TCPCheck, Toggle, second)
+server = HealthCheckServer(port=8080)
+reset = Oneshot()
+server.add_component(
+    name="mail",
+    task=Toggle(
+        initial_state=ok,
+        to_fail=Hysteresis(
+            task=TCPCheck(host="192.0.2.1", port="smtp", timeout=second(10)),
+            fail_after=minute(5),
+            ok_after=minute(5)),
+        to_ok=reset),
+    on_post=reset.fire)
+server.serve_forever()
+```
+
+#### Constructor: `Toggle(to_fail, to_ok, initial_state=ok, name=None)` ####
+
+Create a new `Toggle` object.
+| Parameter | Description
+| --------- | -----------
+| `to_fail` | The task invoked when in the ok state.  If this task fails, this object transitions to the fail state.
+| `to_ok`   | The task invoked when in the fail state.  If this task succeeds, this object transitions to the ok state.
+| `initial_state` | The initial state of this toggle object.
+| `name` | If not `None`, the string to return in `repr()` calls.
+
+* Throws: Does not normally throw.
 
 ## Unit Definitions ##
 
