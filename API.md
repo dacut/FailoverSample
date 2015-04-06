@@ -4,7 +4,7 @@ The public API is entirely available in the `failover` package.
 
 ## Server API ##
 
-### `HealthCheckServer` ###
+### Class HealthCheckServer ###
 
 An HTTP server that supports adding health check components.  This is tightly
 coupled with the (private) handler class.
@@ -32,7 +32,7 @@ If not `None`, `on_post` is a callable to execute on POST requests.
 
 ## Health Check Task API ##
 
-### `TCPCheck` ###
+### Class TCPCheck ###
 
 A health check task that checks whether a TCP service is accepting
 connections.
@@ -49,7 +49,7 @@ integer/float number of seconds).
 | --------- | -----------
 | `host`    | The hostname, IPv4 address, or IPv6 address of the host to test (string).
 | `port`    | The servicename (string) or TCP port (integer, 1-65535) to test.
-| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers and floats are assumed to be seconds.
+| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers and floats are assumed to be seconds.
 | `source_host` | If not `None`, the interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
 | `source_port` | If not `None`, the port to bind the connecting socket to; this must be an integer in the range 1-65535.
 | `name` | If not `None`, the string to return in `repr()` calls.
@@ -62,7 +62,7 @@ integer/float number of seconds).
   name or is outside the range 1-65535; or `timeout` is not a time quantity or
   is less than zero.
 
-### `Hysteresis` ###
+### Class Hysteresis ###
 
 A health check task that adds hysteresis around another health check task.
 
@@ -88,8 +88,8 @@ underlying health check task given by the `task` parameter.
 | --------- | -----------
 | `task`    | The underlying health check task to call.
 | `initial_state` | The initial state of the `Hysteresis` object (bool).
-| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#count) quantity or a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers are also accepted and assumed to be counts, but this is not recommended.
-| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#count) quantity or a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `fail_after` | If the current state is ok, `task` must fail for this duration before switching to the fail state.  This must be a [`count`](#typecount) quantity or a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers are also accepted and assumed to be counts, but this is not recommended.
+| `ok_after` | If the current state is fail, `task` must succeed for this duration before switching to the ok state.  This must be a [`count`](#typecount) quantity or a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers are also accepted and assumed to be counts, but this is not recommended.
 | `name` | If not `None`, the string to return in `repr()` calls.
 
 * Throws: `TypeError` if `fail_after` or `ok_after` are not quantities or
@@ -97,7 +97,7 @@ underlying health check task given by the `task` parameter.
 * Throws: `ValueError` if `fail_after` or `ok_after` are quantities but not
   time or count quantities, or are less than zero.
 
-### `Background` ###
+### Class Background ###
 
 Execute health check tasks asynchronously.
 
@@ -123,7 +123,7 @@ explicitly set to `False`.
 | Parameter | Description
 | --------- | -----------
 | `task`    | The underlying health check task to call.
-| `delay` | The delay between successive calls to `task`.  This must be a time quantity ([`second`](#second), [`minute`](#minute), [`hour`](#hour), or [`day`](#day)); integers and floats are assumed to be seconds.  The interval between task executions is the total time to execute the task **plus** this delay.
+| `delay` | The delay between successive calls to `task`.  This must be a time quantity ([`second`](#typesecond), [`minute`](#typeminute), [`hour`](#typehour), or [`day`](#typeday)); integers and floats are assumed to be seconds.  The interval between task executions is the total time to execute the task **plus** this delay.
 | `initial_state` | The initial state of the `Background` object (bool).  This is state is only used before the first completion of `task`.
 | `start_thread` | Whether the task should be started upon the completion of the constructor.  Subclasses should pass `False` here and invoke `self.start()` themselves to avoid starting the thread before construction has finished.
 
@@ -138,12 +138,12 @@ Notifies the background thread to stop running and waits for it to exit.
 * Returns: `None`
 * Throws: Does not normally throw.
 
-### `Oneshot` ###
+### Class Oneshot ###
 
 A health check task that stays in the given state until fired.  Once fired,
 calling the object returns the opposite result exactly once.
 
-This is typically combined with a [`Toggle`](#toggle) object to enable manual
+This is typically combined with a [`Toggle`](#classtoggle) object to enable manual
 failback on a task.
 
 Firing a task can invoke an optional authentication and authorization handler
@@ -179,7 +179,7 @@ response, and `True` is returned.
 
 ## Unit Definitions ##
 
-### `count` ###
+### Type count ###
 
 This is an explicit count unit from the [units](https://pypi.python.org/pypi/units/) library.  It is defined as:
 ```python
@@ -187,7 +187,7 @@ import units
 count = units.unit('count')
 ```
 
-### `second` ###
+### Type second ###
 
 This is the SI second unit from the [units](https://pypi.python.org/pypi/units/) library.  It is defined as:
 ```python
@@ -196,7 +196,7 @@ units.predefined.define_units()
 second = units.unit('s')
 ```
 
-### `minute` ###
+### Type minute ###
 
 This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 60 seconds.  It is defined as:
 ```python
@@ -205,7 +205,7 @@ units.predefined.define_units()
 minute = units.unit('min')
 ```
 
-### `hour` ###
+### Type hour ###
 
 This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 60 minutes or 3600 seconds.  It is defined as:
 ```python
@@ -214,7 +214,7 @@ units.predefined.define_units()
 hour = units.unit('hour')
 ```
 
-### `day` ###
+### Type day ###
 
 This is a time unit from the [units](https://pypi.python.org/pypi/units/) library, equivalent to 24 hours or 1440 minutes or 86400 seconds.  It is defined as:
 ```python
@@ -223,12 +223,12 @@ units.predefined.define_units()
 day = units.unit('day')
 ```
 
-### `ok` ###
+### Constant ok ###
 
 Same as `True`.  This provides a self-documenting shortcut in health check
 tasks to make the intent explicit.
 
-### `fail` ###
+### Constant fail ###
 
 Same as `False`.  This provides a self-documenting shortcut in health check
 tasks to make the intent explicit.
