@@ -61,6 +61,8 @@ class FailoverRequestHandler(BaseHTTPRequestHandler):
             component = component_map[component_name]
         except KeyError:
             # We don't know about this -- return a 404 (NOT_FOUND) and error
+            # FIXME: This should be a 400 (Bad method) for POSTs that are
+            # invalid.
             log.error("Unknown component %s", component_name)
             return self.respond(NOT_FOUND, u"ERROR")
 
