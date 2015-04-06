@@ -30,13 +30,13 @@ class HysteresisTest(TestCase):
             return True
 
         checker = Hysteresis(task=no_op, name="hyster1",
-                             ok_after=count(1),
-                             fail_after=count(1))
+                             fail_after=count(1),
+                             ok_after=count(1))
         self.assertEqual(repr(checker), "hyster1")
 
         checker = Hysteresis(task=no_op,
-                             ok_after=count(1),
-                             fail_after=count(1))
+                             fail_after=count(1),
+                             ok_after=count(1))
         self.assertTrue(repr(checker).startswith(
             "<failover.hysteresis.Hysteresis"))
         
@@ -46,8 +46,8 @@ class HysteresisTest(TestCase):
         test_task = TestTask()
         checker = Hysteresis(
             task=test_task, initial_state=ok,
-            ok_after=count(5),
-            fail_after=count(3))
+            fail_after=count(3),
+            ok_after=count(5))
 
         self.assertTrue(checker())
         self.assertTrue(checker())
@@ -72,8 +72,8 @@ class HysteresisTest(TestCase):
         test_task = TestTask()
         checker = Hysteresis(
             task=test_task, initial_state=ok,
-            ok_after=second(0.3),
-            fail_after=second(0.5))
+            fail_after=second(0.5),
+            ok_after=second(0.3))
 
         self.assertTrue(checker())
         self.assertTrue(checker())
@@ -97,8 +97,8 @@ class HysteresisTest(TestCase):
         test_task = TestTask()
         checker = Hysteresis(
             task=test_task, initial_state=ok,
-            ok_after=count(2),
-            fail_after=count(2))
+            fail_after=count(2),
+            ok_after=count(2))
 
         self.assertTrue(checker())
         # Throw an exception from the underlying task; hysteresis should still
@@ -129,8 +129,8 @@ class HysteresisTest(TestCase):
         test_task = TestTask()
         checker = Hysteresis(
             task=test_task, initial_state=ok,
-            ok_after=5,
-            fail_after=3)
+            fail_after=3,
+            ok_after=5)
 
         self.assertTrue(checker())
         self.assertTrue(checker())

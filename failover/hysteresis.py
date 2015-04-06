@@ -25,13 +25,13 @@ class Hysteresis(object):
     Exceptions raised by the underlying task are logged and dropped.  These
     effects are ignored by Hysteresis.
     """
-    def __init__(self, task, initial_state=ok, ok_after=count(1),
-                 fail_after=count(1), name=None):
+    def __init__(self, task, initial_state=ok, fail_after=count(1),
+                 ok_after=count(1), name=None):
         super(Hysteresis, self).__init__()
         self.task = task
         self.current_state = initial_state
-        self.ok_after = validate_after(ok_after, "ok_after")
         self.fail_after = validate_after(fail_after, "fail_after")
+        self.ok_after = validate_after(ok_after, "ok_after")
         self.disagree_count = 0
         self.disagree_start = None
         self.name = name
