@@ -44,3 +44,36 @@ to bind the connecting socket to.
 
 If `name` is not `None`, it is used when `repr()` is called on the object.
 
+| Parameter | Description
+| --------- | -----------
+| `host`    | The hostname, IPv4 address, or IPv6 address of the host to test (string).
+| `port`    | The servicename (string) or TCP port (integer, 1-65535) to test.
+| `timeout` | The time limit before a connection attempt is abandoned.  This should be a time quantity (see [`second`](#second)); integers and floats are assumed to be seconds.
+| `source_host` | \[Default: `None`\] The interface to connect from; this must be a hostname, IPv4 address, or IPv6 address (string).
+| `source_port` | \[Default: `None`\] The port to bind the connecting socket to; this must be an integer in the range 1-65535.
+
+## `Hysteresis` ##
+
+A health check task that adds hysteresis around another health check task.
+
+Real world systems are imperfect, and distributed systems are examples of
+this.  A TCP health check may fail even though the system being tested is
+up and reachable for myriad reasons: network congestion, packet loss,
+excessive load on the monitoring system, etc.  Many failovers affect the
+user experience negatively since sessions often must be reestablished.
+Therefore, it is desirable to failover only when the issue is non-transient.
+
+Of course, determining whether an issue is transient or not is typically
+impossible.  Hysteresis is often used as a heuristic for making this
+determination:  a failover/failback action is taken only when the
+underlying health check has been seen to consistently fail/pass beyond a set
+duration (either in time or number of checks).
+
+### Constructor: `Hysteresis(task, initial_state=ok, ok_after=count(1), fail_after=count(1), name=None)` ###
+
+Create a `Hysteresis` object that imposes a delay in the state change of the
+underlying health check task given by the `task` parameter.
+
+To switch the state from ok to fail, the underlying task must consistently
+fail for the duration specified by `fail_after` (either a count or time
+quantity; integers are assumed to be counts).
