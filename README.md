@@ -1,6 +1,8 @@
 # FailoverSample
 Sample failover scripts for aggregating health checks.
 
+See [the API documentation](API.md) for detailed usage information.
+
 ## Examples ##
 
 ### Example 1: Simple TCP check ###
