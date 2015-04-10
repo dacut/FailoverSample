@@ -119,6 +119,6 @@ server.serve_forever()
 
 ## TODO ##
 
-* [ ] Implement auth library.
 * [ ] Implement logic (and/or/not) library.
+* [ ] Implement HTTP layer 7 checks.
 * [ ] Handler should return 400 for broken POSTs.
