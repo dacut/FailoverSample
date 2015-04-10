@@ -111,7 +111,7 @@ server.add_component(
         to_fail=Hysteresis(
             task=TCPCheck(host="192.0.2.1", port=25, timeout=second(10)),
             initial_state=ok,
-            fail_after=minute(5))
+            fail_after=minute(5)),
         to_ok=reset),
     on_post=reset.fire)
 server.serve_forever()
