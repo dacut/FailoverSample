@@ -119,6 +119,7 @@ server.serve_forever()
 
 ## TODO ##
 
-* [ ] Implement logic (and/or/not) library.
+* [ ] Add XSRF prevention.
 * [ ] Implement HTTP layer 7 checks.
+* [ ] Implement logic (and/or/not) library.
 * [ ] Handler should return 400 for broken POSTs.

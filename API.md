@@ -236,6 +236,34 @@ Create a new `Toggle` object.
 
 * Throws: Does not normally throw.
 
+## Support Classes ##
+
+### Class ApachePasswdFileCheck ###
+
+Compare the credentials passed in through the HTTP headers against an Apache
+`htpasswd` generated file.  (See the [Apache documentation on the `htpasswd`
+utility](http://httpd.apache.org/docs/2.2/programs/htpasswd.html) for details
+on how to create an `htpasswd` file.)
+
+The [Apache Portable Runtime](https://apr.apache.org/) library must be
+installed on the host.  This is typically the case for current Unix-based
+systems.
+
+This uses HTTP basic authentication, ***which is insecure over HTTP***.  Use
+HTTPS (i.e. HTTP + SSL/TLS) instead.
+
+***This does not currently have protection against XSRF attacks.***
+
+#### Constructor: `ApachePasswdFileCheck(filename)` ####
+
+Create a new password authenticator which, when called, examines the headers
+on the current HTTP request against the username and password hash combinations
+stored in `filename`.
+
+| Parameter | Description
+| --------- | -----------
+| `filename` | The name of the file containing the Apache username and password hash combinations (string).  This should be generated and maintained using the [`htpasswd` utility](http://httpd.apache.org/docs/2.2/programs/htpasswd.html).
+
 ## Unit Definitions ##
 
 ### Type count ###
